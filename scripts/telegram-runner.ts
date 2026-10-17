@@ -37,6 +37,7 @@ const binaryPath = path.join(process.cwd(), "node_modules", "youtube-dl-exec", "
 const youtubedl = createYoutubeDl(binaryPath);
 
 async function sendTelegramMessage(chatId: number | string, text: string) {
+  if (!chatId || String(chatId).trim() === "") return;
   try {
     await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: "POST",
@@ -49,6 +50,7 @@ async function sendTelegramMessage(chatId: number | string, text: string) {
 }
 
 async function sendTelegramVideo(chatId: number | string, videoPath: string, caption: string) {
+  if (!chatId || String(chatId).trim() === "") return;
   try {
     const fileBuffer = fs.readFileSync(videoPath);
     const formData = new FormData();

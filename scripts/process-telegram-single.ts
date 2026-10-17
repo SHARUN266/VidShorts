@@ -1,10 +1,10 @@
 import { processVideoFromTelegram } from "./telegram-runner";
 
 const youtubeUrl = process.argv[2];
-const chatId = process.argv[3];
+const chatId = process.argv[3] || "";
 
-if (!youtubeUrl || !chatId) {
-  console.error("Usage: npx tsx scripts/process-telegram-single.ts <YOUTUBE_URL> <TELEGRAM_CHAT_ID>");
+if (!youtubeUrl) {
+  console.error("Usage: npx tsx scripts/process-telegram-single.ts <YOUTUBE_URL> [TELEGRAM_CHAT_ID]");
   process.exit(1);
 }
 
