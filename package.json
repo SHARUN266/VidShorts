@@ -1,0 +1,52 @@
+{
+  "name": "vidshot-personal",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "inngest:dev": "npx -y inngest-cli@latest dev -u http://localhost:3000/api/inngest",
+    "get-youtube-token": "npx tsx scripts/get-youtube-token.ts",
+    "telegram": "npx tsx scripts/telegram-runner.ts"
+  },
+  "dependencies": {
+    "@arcjet/next": "^1.0.0-alpha.33",
+    "@aws-sdk/client-s3": "^3.500.0",
+    "@deepgram/sdk": "^3.9.0",
+    "@google/genai": "latest",
+    "@libsql/client": "^0.14.0",
+    "@neondatabase/serverless": "^0.9.0",
+    "@remotion/bundler": "^4.0.515",
+    "@remotion/core": "latest",
+    "@remotion/google-fonts": "^4.0.536",
+    "@remotion/player": "latest",
+    "@remotion/renderer": "latest",
+    "ajv": "^8.20.0",
+    "clsx": "^2.1.1",
+    "drizzle-kit": "^0.30.0",
+    "drizzle-orm": "^0.38.4",
+    "googleapis": "^144.0.0",
+    "inngest": "^3.22.0",
+    "lucide-react": "^0.475.0",
+    "next": "16.3.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "tailwind-merge": "^3.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5",
+    "youtube-dl-exec": "^3.0.15"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.2",
+    "tailwindcss": "^4"
+  }
+}
