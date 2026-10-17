@@ -77,7 +77,42 @@ async function getRemotionBundle(): Promise<string> {
   return cachedBundleLocation;
 }
 
+import http from "http";
+
+let staticServerStarted = false;
+function ensureStaticServer(port = 3000): Promise<void> {
+  if (staticServerStarted) return Promise.resolve();
+  return new Promise<void>((resolve) => {
+    const server = http.createServer((req, res) => {
+      const parsedUrl = new URL(req.url || "/", `http://localhost:${port}`);
+      const filePath = path.join(process.cwd(), "public", parsedUrl.pathname.replace(/^\//, ""));
+      if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+        const stream = fs.createReadStream(filePath);
+        res.writeHead(200, {
+          "Content-Type": "video/mp4",
+          "Access-Control-Allow-Origin": "*",
+        });
+        stream.pipe(res);
+      } else {
+        res.writeHead(404);
+        res.end("Not Found");
+      }
+    });
+
+    server.listen(port, () => {
+      staticServerStarted = true;
+      resolve();
+    });
+
+    server.on("error", () => {
+      staticServerStarted = true;
+      resolve();
+    });
+  });
+}
+
 export async function processVideoFromTelegram(youtubeUrl: string, chatId: number | string) {
+  await ensureStaticServer(3000);
   const videoId = crypto.randomUUID();
   const rawDir = path.join(process.cwd(), "public", "uploads", "raw");
   const renderedDir = path.join(process.cwd(), "public", "uploads", "rendered");

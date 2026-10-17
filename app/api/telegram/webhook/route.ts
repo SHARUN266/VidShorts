@@ -49,7 +49,7 @@ export async function POST(req: Request) {
             Accept: "application/vnd.github.v3+json",
           },
           body: JSON.stringify({
-            ref: "main",
+            ref: "master",
             inputs: {
               youtube_url: youtubeUrl,
               chat_id: String(chatId),
