@@ -3,7 +3,7 @@ import fs from "fs";
 import os from "os";
 import { exec } from "child_process";
 import { promisify } from "util";
-import { create as createYoutubeDl } from "youtube-dl-exec";
+import youtubedlDefault, { create as createYoutubeDl } from "youtube-dl-exec";
 import { transcribeVideo } from "../lib/transcription/deepgram";
 import { findViralClips, ensureHinglishTransliteration } from "../lib/ai/gemini";
 import { bundle } from "@remotion/bundler";
@@ -33,8 +33,21 @@ if (!botToken) {
   process.exit(1);
 }
 
-const binaryPath = path.join(process.cwd(), "node_modules", "youtube-dl-exec", "bin", "yt-dlp.exe");
-const youtubedl = createYoutubeDl(binaryPath);
+// Cross-platform yt-dlp binary resolution (Windows, Linux, GitHub Actions)
+let youtubedl = youtubedlDefault;
+const winBinary = path.join(process.cwd(), "node_modules", "youtube-dl-exec", "bin", "yt-dlp.exe");
+const linuxBinary = path.join(process.cwd(), "node_modules", "youtube-dl-exec", "bin", "yt-dlp");
+
+if (process.platform === "win32" && fs.existsSync(winBinary)) {
+  youtubedl = createYoutubeDl(winBinary);
+} else if (fs.existsSync(linuxBinary)) {
+  try {
+    fs.chmodSync(linuxBinary, "755");
+  } catch {}
+  youtubedl = createYoutubeDl(linuxBinary);
+} else if (fs.existsSync("/usr/local/bin/yt-dlp")) {
+  youtubedl = createYoutubeDl("/usr/local/bin/yt-dlp");
+}
 
 async function sendTelegramMessage(chatId: number | string, text: string) {
   if (!chatId || String(chatId).trim() === "") return;
@@ -208,6 +221,9 @@ export async function processVideoFromTelegram(youtubeUrl: string, chatId: numbe
     const composition = await selectComposition({
       serveUrl: bundleLocation,
       id: "ShortsVideo",
+      chromiumOptions: {
+        args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+      },
       inputProps: {
         videoUrl: `http://localhost:3000/uploads/temp_clips/slice-${videoId}.mp4`,
         startTimeSeconds: 0,
@@ -242,6 +258,9 @@ export async function processVideoFromTelegram(youtubeUrl: string, chatId: numbe
       crf: 23,
       concurrency,
       disallowParallelEncoding: false,
+      chromiumOptions: {
+        args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+      },
       inputProps: {
         videoUrl: `http://localhost:3000/uploads/temp_clips/slice-${videoId}.mp4`,
         startTimeSeconds: 0,
@@ -299,6 +318,7 @@ export async function processVideoFromTelegram(youtubeUrl: string, chatId: numbe
       chatId,
       `❌ *Error aa gaya:*\n\`${error.message || String(error)}\``
     );
+    throw error;
   } finally {
     // Cleanup raw download to save space
     if (fs.existsSync(rawFilePath)) {
